@@ -16,6 +16,9 @@ For comments or questions, please email us at voca@tue.mpg.de
 '''
 
 import tensorflow as tf
+
+# Enable TF 1.x compatibility mode
+tf.compat.v1.disable_eager_execution()
 from utils.ops import fc_layer, conv2d, BatchNorm
 
 class SpeechEncoder:
@@ -26,9 +29,9 @@ class SpeechEncoder:
         self._speech_encoder_size_factor = config['speech_encoder_size_factor']
 
     def __call__(self, speech_features, condition, is_training, reuse=False):
-        with tf.variable_scope(self.scope, reuse=reuse):
+        with tf.compat.v1.variable_scope(self.scope, reuse=reuse):
             if reuse == True:
-                tf.get_variable_scope().reuse_variables()
+                tf.compat.v1.get_variable_scope().reuse_variables()
 
             batch_norm = BatchNorm(epsilon=1e-5, momentum=0.9)
             speech_features = batch_norm(speech_features, reuse=reuse, is_training=is_training)

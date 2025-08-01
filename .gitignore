@@ -1,0 +1,30 @@
+# Python cache
+__pycache__/
+
+# Downloaded files from fetch_data.sh
+# DeepSpeech models (ds_graph/)
+ds_graph/alphabet.txt
+ds_graph/deepspeech-0.1.0-models.tar.gz*
+ds_graph/output_graph.pb
+ds_graph/lm.binary
+ds_graph/trie
+ds_graph/models/
+
+# FLAME models (flame/)
+flame/FLAME2019.zip
+flame/*.pkl
+flame/Readme.pdf
+
+# VOCA models (model/)
+model/model.zip
+model/gstep_52280.model.*
+model/readme.pdf
+
+# Training data
+training_data/*.npy
+training_data/*.pkl
+
+# Generated outputs
+animation_output/
+training/
+*.mp4

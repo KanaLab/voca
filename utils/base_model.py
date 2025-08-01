@@ -20,6 +20,9 @@ import logging
 import numpy as np
 import tensorflow as tf
 
+# Enable TF 1.x compatibility mode
+tf.compat.v1.disable_eager_execution()
+
 class BaseModel(object):
     def __init__(self, session, batcher, config, scope='default'):
         if 'num_render_sequences' in config:
@@ -40,8 +43,8 @@ class BaseModel(object):
             os.makedirs(self.save_path)
 
     def _build_savers(self, max_to_keep):
-        self.saver_forsave = tf.train.Saver(max_to_keep=max_to_keep)
-        self.saver_forrestore = tf.train.Saver()
+        self.saver_forsave = tf.compat.v1.train.Saver(max_to_keep=max_to_keep)
+        self.saver_forrestore = tf.compat.v1.train.Saver()
 
     def _save(self, step):
         save_path = os.path.join(self.config['checkpoint_dir'], 'checkpoints')
@@ -68,7 +71,7 @@ class BaseModel(object):
     def load(self, epoch=None):
         if epoch is None:
             #Load latest checkpoint file
-            ckpt_name = tf.train.latest_checkpoint(self.save_path)
+            ckpt_name = tf.compat.v1.train.latest_checkpoint(self.save_path)
             if ckpt_name is not None:
                 self.saver_forrestore.restore(self.session, ckpt_name)
                 logging.warning("Loading model %s - this will screw up the epoch number during training" % ckpt_name)
@@ -76,7 +79,7 @@ class BaseModel(object):
                 logging.warning("Training model from scratch")
         else:
             approx_gstep = int(epoch*self.batcher.get_training_size()/self.config['batch_size'])
-            ckpt = tf.train.get_checkpoint_state(self.save_path)
+            ckpt = tf.compat.v1.train.get_checkpoint_state(self.save_path)
             chosen_checkpoint_index = self._find_closest_path(ckpt, approx_gstep)
             if ckpt and ckpt.model_checkpoint_path:
                 ckpt_name = os.path.basename(ckpt.all_model_checkpoint_paths[chosen_checkpoint_index])

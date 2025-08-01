@@ -26,6 +26,9 @@ from subprocess import call
 
 import numpy as np
 import tensorflow as tf
+
+# Enable TF 1.x compatibility mode
+tf.compat.v1.disable_eager_execution()
 from scipy.io import wavfile
 from sklearn.manifold import TSNE
 
@@ -47,7 +50,7 @@ class VOCAModel(BaseModel):
         self.build_decoder = getattr(self, '_build_decoder')
 
     def build_graph(self):
-        with tf.variable_scope(self.scope):
+        with tf.compat.v1.variable_scope(self.scope):
             self.init_paceholders()
             self.build_encoder()
             self.build_decoder()
@@ -160,18 +163,18 @@ class VOCAModel(BaseModel):
         decay_steps = self.batcher.get_training_size()//self.config['batch_size']
         decay_rate = self.config['decay_rate']
         if decay_rate < 1:
-            self.global_learning_rate = tf.train.exponential_decay(self.config['learning_rate'], self.global_step,
+            self.global_learning_rate = tf.compat.v1.train.exponential_decay(self.config['learning_rate'], self.global_step,
                                                                    decay_steps, decay_rate, staircase=True)
         else:
             self.global_learning_rate = tf.constant(self.config['learning_rate'], dtype=tf.float32)
         tf.summary.scalar('learning_rate_training', self.global_learning_rate, collections=['train'])
         tf.summary.scalar('learning_rate_validation', self.global_learning_rate, collections=['validation'])
 
-        self.optim = tf.train.AdamOptimizer(self.global_learning_rate, self.config['adam_beta1_value']).\
+        self.optim = tf.compat.v1.train.AdamOptimizer(self.global_learning_rate, self.config['adam_beta1_value']).\
             minimize(self.loss, var_list=self.t_vars, global_step=self.global_step)
 
         self._init_summaries()
-        tf.global_variables_initializer().run()
+        tf.compat.v1.global_variables_initializer().run()
 
     def _init_summaries(self):
         self.train_summary = tf.summary.merge_all('train')

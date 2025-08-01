@@ -20,6 +20,9 @@ from __future__ import division
 
 import tensorflow as tf
 
+# Enable TF 1.x compatibility mode
+tf.compat.v1.disable_eager_execution()
+
 def reconstruction_loss(predicted, real, want_absolute_loss=True, want_in_mm=False, weights=None):
     if weights is not None:
         assert predicted.shape[1] == real.shape[1] == weights.shape[0]

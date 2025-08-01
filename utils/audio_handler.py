@@ -22,6 +22,9 @@ import numpy as np
 import tensorflow as tf
 from python_speech_features import mfcc
 
+# Enable TF 1.x compatibility mode
+tf.compat.v1.disable_eager_execution()
+
 
 def interpolate_features(features, input_rate, output_rate, output_len=None):
     num_features = features.shape[1]
@@ -93,12 +96,12 @@ class AudioHandler:
             raise ValueError('Wrong type for audio')
 
         # Load graph and place_holders
-        with tf.gfile.GFile(self.config['deepspeech_graph_fname'], "rb") as f:
-            graph_def = tf.GraphDef()
+        with tf.io.gfile.GFile(self.config['deepspeech_graph_fname'], "rb") as f:
+            graph_def = tf.compat.v1.GraphDef()
             graph_def.ParseFromString(f.read())
 
-        graph = tf.get_default_graph()
-        tf.import_graph_def(graph_def, name="deepspeech")
+        graph = tf.compat.v1.get_default_graph()
+        tf.compat.v1.import_graph_def(graph_def, name="deepspeech")
         input_tensor = graph.get_tensor_by_name('deepspeech/input_node:0')
         seq_length = graph.get_tensor_by_name('deepspeech/input_lengths:0')
         layer_6 = graph.get_tensor_by_name('deepspeech/logits:0')
@@ -107,7 +110,7 @@ class AudioHandler:
         n_context = 9
 
         processed_audio = copy.deepcopy(audio)
-        with tf.Session(graph=graph) as sess:
+        with tf.compat.v1.Session(graph=graph) as sess:
             for subj in audio.keys():
                 for seq in audio[subj].keys():
                     print('process audio: %s - %s' % (subj, seq))

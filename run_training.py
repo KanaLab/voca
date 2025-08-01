@@ -23,6 +23,9 @@ import subprocess
 import configparser
 import tensorflow as tf
 
+# Enable TF 1.x compatibility mode
+tf.compat.v1.disable_eager_execution()
+
 from config_parser import read_config, create_default_config
 from utils.data_handler import DataHandler
 from utils.batcher import Batcher
@@ -72,7 +75,7 @@ def main():
     data_handler = DataHandler(config)
     batcher = Batcher(data_handler)
 
-    with tf.Session() as session:
+    with tf.compat.v1.Session() as session:
         model = Model(session=session, config=config, batcher=batcher)
         model.build_graph()
         model.load()

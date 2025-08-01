@@ -17,6 +17,9 @@ For comments or questions, please email us at voca@tue.mpg.de
 
 import numpy as np
 import tensorflow as tf
+
+# Enable TF 1.x compatibility mode
+tf.compat.v1.disable_eager_execution()
 from utils.ops import fc_layer
 
 class ExpressionLayer:
@@ -29,7 +32,7 @@ class ExpressionLayer:
         self.scope = scope
 
     def __call__(self, parameters, if_reuse=False):
-        with tf.variable_scope(self.scope, reuse=if_reuse):
+        with tf.compat.v1.variable_scope(self.scope, reuse=if_reuse):
 
             init_exp_basis = np.zeros((3*self.num_vertices, self.expression_dim))
 

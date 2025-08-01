@@ -17,6 +17,9 @@ For comments or questions, please email us at voca@tue.mpg.de
 
 import tensorflow as tf
 
+# Enable TF 1.x compatibility mode
+tf.compat.v1.disable_eager_execution()
+
 def fc_layer(inputs,
              num_units_in,
              num_units_out,
@@ -26,7 +29,7 @@ def fc_layer(inputs,
              trainable=True,
              scope=None,
              regularisation_constant=0.0):
-    with tf.variable_scope(scope):
+    with tf.compat.v1.variable_scope(scope):
         weights_shape = [num_units_in, num_units_out]
 
         if init_weights is not None:
@@ -37,15 +40,15 @@ def fc_layer(inputs,
         else:
             weights_initializer = tf.truncated_normal_initializer(stddev=weightini)
 
-        weights = tf.get_variable('weights',
+        weights = tf.compat.v1.get_variable('weights',
                                   shape=weights_shape,
                                   initializer=weights_initializer,
                                   trainable=trainable,
-                                  regularizer=tf.contrib.layers.l2_regularizer(scale=regularisation_constant))
+                                  regularizer=tf.keras.regularizers.L2(regularisation_constant))
 
         bias_shape = [num_units_out, ]
         bias_initializer = tf.constant_initializer(bias)
-        biases = tf.get_variable('biases',
+        biases = tf.compat.v1.get_variable('biases',
                                  shape=bias_shape,
                                  initializer=bias_initializer,
                                  trainable=trainable)
@@ -63,7 +66,7 @@ def custom_fc_layer(inputs,
              regularisation_constant=0.0,
              output_weights=False,
               scope=None):
-    with tf.variable_scope(scope):
+    with tf.compat.v1.variable_scope(scope):
         weights_shape = [num_units_in, num_units_out]
 
         if init_weights is not None:
@@ -74,15 +77,15 @@ def custom_fc_layer(inputs,
         else:
             weights_initializer = tf.truncated_normal_initializer(stddev=weightini)
 
-        weights = tf.get_variable('weights',
+        weights = tf.compat.v1.get_variable('weights',
                                   shape=weights_shape,
                                   initializer=weights_initializer,
                                   trainable=trainable_weights,
-                                  regularizer=tf.contrib.layers.l2_regularizer(scale=regularisation_constant))
+                                  regularizer=tf.keras.regularizers.L2(regularisation_constant))
 
         bias_shape = [num_units_out, ]
         bias_initializer = tf.constant_initializer(bias)
-        biases = tf.get_variable('biases',
+        biases = tf.compat.v1.get_variable('biases',
                                  shape=bias_shape,
                                  initializer=bias_initializer,
                                  trainable=trainable_bias)
@@ -130,11 +133,11 @@ def conv2d(inputs, n_filters,
     x : Tensor
         Convolved input.
     """
-    with tf.variable_scope(scope):
+    with tf.compat.v1.variable_scope(scope):
         w = tf.get_variable('weights',
                             [k_h, k_w, inputs.get_shape()[-1], n_filters],
                             initializer=tf.truncated_normal_initializer(stddev=stddev),
-                            regularizer=tf.contrib.layers.l2_regularizer(scale=regularisation_constant))
+                            regularizer=tf.keras.regularizers.L2(regularisation_constant))
         conv = tf.nn.conv2d(inputs,
                             w,
                             strides=[1, stride_h, stride_w, 1],
@@ -151,18 +154,17 @@ def conv2d(inputs, n_filters,
 
 class BatchNorm(object):
     def __init__(self, epsilon=1e-5, momentum=0.9, name="batch_norm"):
-        with tf.variable_scope(name):
+        with tf.compat.v1.variable_scope(name):
             self.epsilon = epsilon
             self.momentum = momentum
             self.name = name
 
     def __call__(self, x, reuse=False, is_training=True):
-        return tf.contrib.layers.batch_norm(x,
-                                            decay=self.momentum,
-                                            updates_collections=None,
-                                            epsilon=self.epsilon,
-                                            center=True,
-                                            scale=True,
-                                            is_training=is_training,
-                                            reuse=reuse,
-                                            scope=self.name)
+        return tf.compat.v1.layers.batch_normalization(x,
+                                                       momentum=self.momentum,
+                                                       epsilon=self.epsilon,
+                                                       center=True,
+                                                       scale=True,
+                                                       training=is_training,
+                                                       reuse=reuse,
+                                                       name=self.name)

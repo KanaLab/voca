@@ -25,6 +25,9 @@ import tensorflow as tf
 from subprocess import call
 from scipy.io import wavfile
 
+# Enable TF 1.x compatibility mode
+tf.compat.v1.disable_eager_execution()
+
 from psbody.mesh import Mesh
 from utils.audio_handler import  AudioHandler
 from utils.rendering import render_mesh_helper
@@ -109,8 +112,8 @@ def inference(tf_model_fname, ds_fname, audio_fname, template_fname, condition_i
     processed_audio = process_audio(ds_fname, audio, sample_rate)
 
     # Load previously saved meta graph in the default graph
-    saver = tf.train.import_meta_graph(tf_model_fname + '.meta')
-    graph = tf.get_default_graph()
+    saver = tf.compat.v1.train.import_meta_graph(tf_model_fname + '.meta')
+    graph = tf.compat.v1.get_default_graph()
 
     speech_features = graph.get_tensor_by_name(u'VOCA/Inputs_encoder/speech_features:0')
     condition_subject_id = graph.get_tensor_by_name(u'VOCA/Inputs_encoder/condition_subject_id:0')
@@ -124,14 +127,14 @@ def inference(tf_model_fname, ds_fname, audio_fname, template_fname, condition_i
                  is_training: False,
                  input_template: np.repeat(template.v[np.newaxis, :, :, np.newaxis], num_frames, axis=0)}
 
-    with tf.Session() as session:
+    with tf.compat.v1.Session() as session:
         # Restore trained model
         saver.restore(session, tf_model_fname)
         predicted_vertices = np.squeeze(session.run(output_decoder, feed_dict))
         output_sequence_meshes(predicted_vertices, template, out_path)
         if(render_sequence):
             render_sequence_meshes(audio_fname, predicted_vertices, template, out_path, uv_template_fname, texture_img_fname)
-    tf.reset_default_graph()
+    tf.compat.v1.reset_default_graph()
 
 
 def inference_interpolate_styles(tf_model_fname, ds_fname, audio_fname, template_fname, condition_weights, out_path):
@@ -145,8 +148,8 @@ def inference_interpolate_styles(tf_model_fname, ds_fname, audio_fname, template
     processed_audio = process_audio(ds_fname, audio, sample_rate)
 
     # Load previously saved meta graph in the default graph
-    saver = tf.train.import_meta_graph(tf_model_fname + '.meta')
-    graph = tf.get_default_graph()
+    saver = tf.compat.v1.train.import_meta_graph(tf_model_fname + '.meta')
+    graph = tf.compat.v1.get_default_graph()
 
     speech_features = graph.get_tensor_by_name(u'VOCA/Inputs_encoder/speech_features:0')
     condition_subject_id = graph.get_tensor_by_name(u'VOCA/Inputs_encoder/condition_subject_id:0')
@@ -160,7 +163,7 @@ def inference_interpolate_styles(tf_model_fname, ds_fname, audio_fname, template
     num_frames = processed_audio.shape[0]
     output_vertices = np.zeros((num_frames, template.v.shape[0], template.v.shape[1]))
 
-    with tf.Session() as session:
+    with tf.compat.v1.Session() as session:
         # Restore trained model
         saver.restore(session, tf_model_fname)
 
